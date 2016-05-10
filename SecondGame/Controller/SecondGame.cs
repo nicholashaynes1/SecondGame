@@ -71,7 +71,7 @@ namespace SecondGame.Controller
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw (GameTime gameTime)
 		{
-			graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
+			graphics.GraphicsDevice.Clear (Color.DeepPink);
             
 			//TODO: Add your drawing code here
             
