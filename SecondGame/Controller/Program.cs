@@ -13,7 +13,7 @@ using UIKit;
 #endif
 #endregion
 
-namespace SecondGame
+namespace SecondGame.Controller
 {
 	#if __IOS__ || __TVOS__
     [Register("AppDelegate")]
@@ -23,11 +23,11 @@ namespace SecondGame
 	static class Program
     #endif
     {
-		private static Game1 game;
+		private static SecondGame game;
 
 		internal static void RunGame ()
 		{
-			game = new Game1 ();
+			game = new SecondGame ();
 			game.Run ();
 			#if !__IOS__  && !__TVOS__
 			game.Dispose ();
