@@ -18,35 +18,35 @@ namespace SecondGame.Controller
 	public class SecondGame : Game
 	{
 		//explosion animations.
-		Texture2D explosionTexture;
-		List<Animation> explosions;
+		private Texture2D explosionTexture;
+		private List<Animation> explosions;
 
 		// The sound that is played when a laser is fired
-		SoundEffect laserSound;
+		private SoundEffect laserSound;
 
 		// The sound used when the player or an enemy dies
-		SoundEffect explosionSound;
+		private SoundEffect explosionSound;
 
 		// The music played during gameplay
-		Song gameplayMusic;
+		private Song gameplayMusic;
 
 
 		// Keyboard states used to determine key presses
-		KeyboardState currentKeyboardState;
-		KeyboardState previousKeyboardState;
+		private KeyboardState currentKeyboardState;
+		private KeyboardState previousKeyboardState;
 
 		// Gamepad states used to determine button presses
-		GamePadState currentGamePadState;
-		GamePadState previousGamePadState; 
+		private GamePadState currentGamePadState;
+		private GamePadState previousGamePadState; 
 
 		// A movement speed for the player
-		float playerMoveSpeed;
+		private float playerMoveSpeed;
 		private GraphicsDeviceManager graphics;
 		private SpriteBatch spriteBatch;
 		private Player player;
 
 		// Image used to display the static background
-		Texture2D mainBackground;
+		private Texture2D mainBackground;
 
 		// Parallaxing Layers
 		private ParallaxingBackground bgLayer1;
@@ -62,25 +62,25 @@ namespace SecondGame.Controller
 		// A random number generator
 		private Random random;
 
-		Texture2D projectileTexture;
-		List<Projectile> projectiles;
+		private Texture2D projectileTexture;
+		private List<Projectile> projectiles;
 
 		// The rate of fire of the player laser
-		TimeSpan fireTime;
-		TimeSpan previousFireTime;
+		private TimeSpan fireTime;
+		private TimeSpan previousFireTime;
 
-		Texture2D beamTexture;
-		List<BeamWeapon> beams;
+		private Texture2D beamTexture;
+		private List<BeamWeapon> beams;
 
 		// The rate of fire of the player laser
-		TimeSpan beamRate;
-		TimeSpan previousBeamTime;
+		private TimeSpan beamRate;
+		private TimeSpan previousBeamTime;
 
 		//Number that holds the player score
-		int score;
+		private int score;
 
 		// The font used to display UI elements
-		SpriteFont font;
+		private SpriteFont font;
 
 
 		public SecondGame ()
@@ -134,7 +134,7 @@ namespace SecondGame.Controller
 			projectiles = new List<Projectile>();
 
 			//initalizes the beam ArrayList;
-			beams = new List<BeamWeapon> ();
+			beams = new List<BeamWeapon>();
 
 			// Set the laser to fire every quarter second for the projectile
 			fireTime = TimeSpan.FromSeconds(.15f);
@@ -174,7 +174,8 @@ namespace SecondGame.Controller
 
 			mainBackground = Content.Load<Texture2D>("Textures/mainbackground");
 
-			projectileTexture = Content.Load<Texture2D>("Textures/laser");
+			projectileTexture = Content.Load<Texture2D>("Textures/dat boi");
+
 			beamTexture = Content.Load<Texture2D> ("Textures/laser");
 
 			//textures for the explosions
@@ -243,8 +244,8 @@ namespace SecondGame.Controller
 				laserSound.Play();
 			}
 
-			// Fire only every interval we set as the fireTime
-			if (gameTime.TotalGameTime - previousBeamTime > beamRate)
+			// Fire our beam constantly and checking for a button press
+			if (gameTime.TotalGameTime - previousBeamTime > beamRate && currentKeyboardState.IsKeyDown(Keys.Space))
 			{
 				// Reset our current time
 				previousBeamTime = gameTime.TotalGameTime;
@@ -519,7 +520,7 @@ namespace SecondGame.Controller
 
 		private void AddBeam(Vector2 position)
 		{
-			BeamWeapon beam = new BeamWeapon ();
+			BeamWeapon beam = new BeamWeapon();
 			beam.Initialize (GraphicsDevice.Viewport, beamTexture, position);
 			beams.Add(beam);
 		}
