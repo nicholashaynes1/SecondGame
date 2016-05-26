@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Storage;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using SecondGame.Model;
 using SecondGame.View;
 
@@ -15,6 +17,20 @@ namespace SecondGame.Controller
 	/// </summary>
 	public class SecondGame : Game
 	{
+		//explosion animations.
+		Texture2D explosionTexture;
+		List<Animation> explosions;
+
+		// The sound that is played when a laser is fired
+		SoundEffect laserSound;
+
+		// The sound used when the player or an enemy dies
+		SoundEffect explosionSound;
+
+		// The music played during gameplay
+		Song gameplayMusic;
+
+
 		// Keyboard states used to determine key presses
 		KeyboardState currentKeyboardState;
 		KeyboardState previousKeyboardState;
@@ -53,14 +69,34 @@ namespace SecondGame.Controller
 		TimeSpan fireTime;
 		TimeSpan previousFireTime;
 
+		Texture2D beamTexture;
+		List<BeamWeapon> beams;
+
+		// The rate of fire of the player laser
+		TimeSpan beamRate;
+		TimeSpan previousBeamTime;
+
+		//Number that holds the player score
+		int score;
+
+		// The font used to display UI elements
+		SpriteFont font;
+
+
 		public SecondGame ()
 		{
 			
 			graphics = new GraphicsDeviceManager (this);
 			Content.RootDirectory = "Content";
 		}
-
-
+			
+		private void AddExplosion(Vector2 position)
+		{
+			Animation explosion = new Animation();
+			explosion.Initialize(explosionTexture,position, 134, 134, 12, 45, Color.White, 1f,false);
+			explosions.Add(explosion);
+		}
+			
 		protected override void Initialize ()
 		{
 			bgLayer1 = new ParallaxingBackground();
@@ -94,10 +130,23 @@ namespace SecondGame.Controller
 
 			playerMoveSpeed = 8.0f;
 
+			//initalizes the projectile ArrayList
 			projectiles = new List<Projectile>();
 
-			// Set the laser to fire every quarter second
+			//initalizes the beam ArrayList;
+			beams = new List<BeamWeapon> ();
+
+			// Set the laser to fire every quarter second for the projectile
 			fireTime = TimeSpan.FromSeconds(.15f);
+
+			//the beams rate of fire is set to 0 to create a beam effect
+			beamRate = TimeSpan.FromSeconds(.0f);
+
+			//initializing explosions
+			explosions = new List<Animation>();
+
+			//Set player's score to zero
+			score = 0;
             
 			base.Initialize ();
 		}
@@ -126,8 +175,24 @@ namespace SecondGame.Controller
 			mainBackground = Content.Load<Texture2D>("Textures/mainbackground");
 
 			projectileTexture = Content.Load<Texture2D>("Textures/laser");
-		
-	
+			beamTexture = Content.Load<Texture2D> ("Textures/laser");
+
+			//textures for the explosions
+			explosionTexture = Content.Load<Texture2D>("Animations/explosion");
+
+			// Load the music
+			gameplayMusic = Content.Load<Song>("Sounds/gameMusic");
+
+			// Load the laser and explosion sound effect
+			laserSound = Content.Load<SoundEffect>("Sounds/laserFire");
+			explosionSound = Content.Load<SoundEffect>("Sounds/explosion");
+
+			// Start the music right away
+			PlayMusic(gameplayMusic);
+
+			// Load the score font
+			font = Content.Load<SpriteFont>("Fonts/gameFont");
+
 		}
 
 
@@ -173,8 +238,47 @@ namespace SecondGame.Controller
 
 				// Add the projectile, but add it to the front and center of the player
 				AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
+
+				// Play the laser sound
+				laserSound.Play();
+			}
+
+			// Fire only every interval we set as the fireTime
+			if (gameTime.TotalGameTime - previousBeamTime > beamRate)
+			{
+				// Reset our current time
+				previousBeamTime = gameTime.TotalGameTime;
+
+				// Add the projectile, but add it to the front and center of the player
+				AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
+
+				// Play the laser sound
+				laserSound.Play();
+			}
+
+
+
+			// reset score if player health goes to zero
+			if (player.Health <= 0)
+			{
+				player.Health = 100;
+				score = 0;
+			}
+
+		}
+
+		private void UpdateExplosions(GameTime gameTime)
+		{
+			for (int i = explosions.Count - 1; i >= 0; i--)
+			{
+				explosions[i].Update(gameTime);
+				if (explosions[i].Active == false)
+				{
+					explosions.RemoveAt(i);
+				}
 			}
 		}
+
 		protected override void Update (GameTime gameTime)
 		{
 			
@@ -190,6 +294,10 @@ namespace SecondGame.Controller
 
 			// Update the projectiles
 			UpdateProjectiles();
+
+
+			// Update the explosions
+			UpdateExplosions(gameTime);
 
 			//Update the player
 
@@ -247,10 +355,23 @@ namespace SecondGame.Controller
 			// Draw the Player
 			player.Draw(spriteBatch);
 
+
+			// Draw the explosions
+			for (int i = 0; i < explosions.Count; i++)
+			{
+				explosions[i].Draw(spriteBatch);
+			}
+
+			// Draw the score
+			spriteBatch.DrawString(font, "score: " + score, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y), Color.White);
+
+			// Draw the player health
+			spriteBatch.DrawString(font, "health: " + player.Health, new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + 30), Color.White);
+				
+			base.Draw(gameTime);
+
 			// Stop drawing
 			spriteBatch.End();
-
-			base.Draw (gameTime);
 
 		}
 
@@ -293,6 +414,21 @@ namespace SecondGame.Controller
 
 				if (enemies[i].Active == false)
 				{
+					// If not active and health <= 0
+					if (enemies[i].Health <= 0)
+					{
+						// Add an explosion
+						AddExplosion(enemies[i].Position);
+
+						//Add to the player's score
+						score += 1;
+
+						// Play the explosion sound
+						explosionSound.Play();
+
+
+					}
+
 					enemies.RemoveAt(i);
 				} 
 			}
@@ -380,6 +516,14 @@ namespace SecondGame.Controller
 			}
 		}
 
+
+		private void AddBeam(Vector2 position)
+		{
+			BeamWeapon beam = new BeamWeapon ();
+			beam.Initialize (GraphicsDevice.Viewport, beamTexture, position);
+			beams.Add(beam);
+		}
+
 		private void AddProjectile(Vector2 position)
 		{
 			Projectile projectile = new Projectile(); 
@@ -387,7 +531,21 @@ namespace SecondGame.Controller
 			projectiles.Add(projectile);
 		}
 	
-	}
+	
+		private void PlayMusic(Song song)
+		{
+			// Due to the way the MediaPlayer plays music,
+			// we have to catch the exception. Music will play when the game is not tethered
+			try
+			{
+				// Play the music
+				MediaPlayer.Play(song);
 
+				// Loop the currently playing song
+				MediaPlayer.IsRepeating = true;
+			}
+			catch { }
+		}
+	}
 }
 
