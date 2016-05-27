@@ -1,14 +1,13 @@
 ﻿using System;
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace SecondGame
 {
-	public class Projectile
+	public class SoundWeapon
 	{
 		// Image representing the Projectile
-		public Texture2D Texture;
+		public Texture2D SoundTexture;
 
 		// Position of the Projectile relative to the upper left side of the screen
 		public Vector2 Position;
@@ -29,18 +28,18 @@ namespace SecondGame
 		// Get the width of the projectile ship
 		public int Width
 		{
-			get { return Texture.Width; }
+			get { return SoundTexture.Width; }
 		}
 
 		// Get the height of the projectile ship
 		public int Height
 		{
-			get { return Texture.Height; }
+			get { return SoundTexture.Height; }
 		}
-			
-		public void Initialize(Viewport viewport, Texture2D texture, Vector2 position)
+		
+		public void Initialize(Viewport viewport, Texture2D soundTexture, Vector2 position)
 		{
-			Texture = texture;
+			SoundTexture = soundTexture;
 			Position = position;
 			this.viewport = viewport;
 
@@ -48,14 +47,12 @@ namespace SecondGame
 
 			Damage = 2;
 
-			projectileMoveSpeed = 5f;
+			projectileMoveSpeed = 20f;
 		}
 		public void Update()
 		{
 			// Projectiles always move to the right
 			Position.X += projectileMoveSpeed;
-
-			Position.Y += (float)Math.Sin (Position.X)*100;
 
 			// Deactivate the bullet if it goes out of screen
 			if (Position.X + Texture.Width / 2 > viewport.Width)

@@ -40,7 +40,7 @@ namespace SecondGame
 
 		public void Initialize(Viewport viewport, Texture2D beamTexture, Vector2 position)
 		{
-			BeamTexture = beamTexture;
+			this.BeamTexture = beamTexture;
 			Position = position;
 			this.viewport = viewport;
 

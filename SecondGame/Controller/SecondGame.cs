@@ -51,16 +51,18 @@ namespace SecondGame.Controller
 		// Parallaxing Layers
 		private ParallaxingBackground bgLayer1;
 		private ParallaxingBackground bgLayer2;
+
 		// Enemies
 		private Texture2D enemyTexture;
 		private List<Enemy> enemies;
 
+
 		// The rate at which the enemies appear
-		private TimeSpan enemySpawnTime;
-		private TimeSpan previousSpawnTime;
+		TimeSpan enemySpawnTime;
+		TimeSpan previousSpawnTime;
 
 		// A random number generator
-		private Random random;
+		Random random;
 
 		private Texture2D projectileTexture;
 		private List<Projectile> projectiles;
@@ -172,6 +174,8 @@ namespace SecondGame.Controller
 
 			enemyTexture = Content.Load<Texture2D>("Animations/mineAnimation");
 
+
+
 			mainBackground = Content.Load<Texture2D>("Textures/mainbackground");
 
 			projectileTexture = Content.Load<Texture2D>("Textures/dat boi");
@@ -251,7 +255,7 @@ namespace SecondGame.Controller
 				previousBeamTime = gameTime.TotalGameTime;
 
 				// Add the projectile, but add it to the front and center of the player
-				AddProjectile(player.Position + new Vector2(player.Width / 2, 0));
+				AddBeam(player.Position + new Vector2(player.Width / 2, 0));
 
 				// Play the laser sound
 				laserSound.Play();
@@ -296,6 +300,8 @@ namespace SecondGame.Controller
 			// Update the projectiles
 			UpdateProjectiles();
 
+			//update the beam
+			UpdateBeam();
 
 			// Update the explosions
 			UpdateExplosions(gameTime);
@@ -353,6 +359,12 @@ namespace SecondGame.Controller
 				projectiles[i].Draw(spriteBatch);
 			}
 
+			// Draw the Projectiles
+			for (int i = 0; i < beams.Count; i++)
+			{
+				beams[i].Draw(spriteBatch);
+			}
+
 			// Draw the Player
 			player.Draw(spriteBatch);
 
@@ -395,6 +407,25 @@ namespace SecondGame.Controller
 
 			// Add the enemy to the active enemies list
 			enemies.Add(enemy);
+		}
+
+		private void AddNewEnemy()
+		{ 
+			// Create the animation object
+			Animation newEnemyAnimation = new Animation();
+
+			// Initialize the animation with the correct animation information
+		
+
+			// Randomly generate the position of the enemy
+			Vector2 position = new Vector2(GraphicsDevice.Viewport.Width +enemyTexture.Width / 2, random.Next(100, GraphicsDevice.Viewport.Height -100));
+
+			// Create an enemy
+			Enemy enemy = new Enemy();
+
+			// Initialize the enemy
+			enemy.Initialize(newEnemyAnimation, position); 
+
 		}
 	
 		private void UpdateEnemies(GameTime gameTime)
@@ -513,6 +544,20 @@ namespace SecondGame.Controller
 				if (projectiles[i].Active == false)
 				{
 					projectiles.RemoveAt(i);
+				} 
+			}
+		}
+
+		private void UpdateBeam()
+		{
+			// Update the Projectiles
+			for (int i = beams.Count - 1; i >= 0; i--) 
+			{
+				beams[i].Update();
+
+				if (beams[i].Active == false)
+				{
+					beams.RemoveAt(i);
 				} 
 			}
 		}
